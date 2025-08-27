@@ -1,6 +1,10 @@
 from enum import Enum
 
-from src.engine.typings import State
+from src.engine.typings import State, StateRow
+
+
+class UnsupportedDirection(Exception):
+    pass
 
 
 class Direction(Enum):
@@ -15,5 +19,35 @@ class Engine2048:
         pass
 
     @staticmethod
+    def merge_row_left(row: StateRow) -> StateRow:
+        row_length = len(row)
+        row = [e for e in row if e != 0]
+
+        merged_row: StateRow = []
+        i = 0
+        while i < len(row):
+            current = row[i]
+            if i + 1 < len(row) and row[i + 1] == current:
+                merged_value = current * 2
+                merged_row.append(merged_value)
+                i += 2
+            else:
+                merged_row.append(current)
+                i += 1
+
+        if len(merged_row) < row_length:
+            merged_row.extend([0] * (row_length - len(merged_row)))
+        return merged_row
+
+    @staticmethod
+    def merge_left(state: State) -> State:
+        return [Engine2048.merge_row_left(row) for row in state]
+
+    @staticmethod
     def merge(state: State, direction: Direction) -> State:
-        return state
+        if direction == Direction.LEFT:
+            return Engine2048.merge_left(state)
+
+        raise UnsupportedDirection(
+            f"The given direction '{direction}' is not supported."
+        )
