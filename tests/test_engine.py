@@ -1,6 +1,6 @@
 import pytest
 
-from src.engine.engine import Direction, Engine2048
+from src.engine.engine import Direction, Engine2048, UnsupportedDirection
 from src.engine.typings import State
 
 
@@ -34,3 +34,9 @@ def test_merge(initial_state, direction, expected_state):
     result_state = Engine2048.merge(initial_state, direction)
 
     assert result_state == expected_state
+
+
+@pytest.mark.parametrize("direction", [None, 4, "string"])
+def test_merge_in_unsupported_direction(initial_state, direction):
+    with pytest.raises(UnsupportedDirection):
+        Engine2048.merge(initial_state, direction)

@@ -59,6 +59,14 @@ class Engine2048:
             prepared_state = Engine2048.flip(state)
             next_state = Engine2048.merge_left(prepared_state)
             return Engine2048.flip(next_state)
+        if direction == Direction.UP:
+            prepared_state = Engine2048.rotate_clockwise(Engine2048.flip(state))
+            next_state = Engine2048.merge_left(prepared_state)
+            return Engine2048.flip(Engine2048.rotate_clockwise(next_state))
+        if direction == Direction.DOWN:
+            prepared_state = Engine2048.flip(Engine2048.rotate_clockwise(state))
+            next_state = Engine2048.merge_left(prepared_state)
+            return Engine2048.rotate_clockwise(Engine2048.flip(next_state))
 
         raise UnsupportedDirection(
             f"The given direction '{direction}' is not supported."
