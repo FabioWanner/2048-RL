@@ -44,9 +44,21 @@ class Engine2048:
         return [Engine2048.merge_row_left(row) for row in state]
 
     @staticmethod
+    def flip(state: State) -> State:
+        return [list(reversed(row)) for row in state]
+
+    @staticmethod
+    def rotate_clockwise(state: State) -> State:
+        return [[state[j][i] for j in range(len(state))] for i in range(len(state))]
+
+    @staticmethod
     def merge(state: State, direction: Direction) -> State:
         if direction == Direction.LEFT:
             return Engine2048.merge_left(state)
+        if direction == Direction.RIGHT:
+            prepared_state = Engine2048.flip(state)
+            next_state = Engine2048.merge_left(prepared_state)
+            return Engine2048.flip(next_state)
 
         raise UnsupportedDirection(
             f"The given direction '{direction}' is not supported."
