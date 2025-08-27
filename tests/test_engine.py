@@ -1,4 +1,5 @@
 from random import Random
+from typing import Callable, Sequence, Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -12,9 +13,14 @@ def initial_state() -> State:
     return [[0, 8, 2, 2], [4, 2, 0, 2], [0, 0, 0, 0], [0, 0, 0, 2]]
 
 
-def test_generate_state():
+@pytest.fixture
+def choice_fn() -> Callable[[Sequence[Any]], Any]:
     rng = Random(0)
-    result_state = Engine2048.generate_state(3, [0, 3, 7], rng.choice)
+    return rng.choice
+
+
+def test_generate_state(choice_fn):
+    result_state = Engine2048.generate_state(3, [0, 3, 7], choice_fn)
     assert result_state == [[3, 3, 0], [3, 7, 3], [3, 3, 3]]
 
 
@@ -70,3 +76,8 @@ def test_merge_in_unsupported_direction(initial_state, direction):
 )
 def test_game_over(state, expect_game_over):
     assert Engine2048.check_game_over(state) is expect_game_over
+
+
+def test_spawn_random(initial_state, choice_fn):
+    result_state = Engine2048.spawn_random(initial_state, [2, 4], choice_fn)
+    assert result_state == [[0, 8, 2, 2], [4, 2, 0, 2], [0, 0, 0, 0], [4, 0, 0, 2]]

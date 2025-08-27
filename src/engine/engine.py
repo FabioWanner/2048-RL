@@ -1,5 +1,6 @@
+import copy
 from enum import Enum
-from typing import List, Callable, Sequence
+from typing import List, Callable, Sequence, Any
 
 from src.engine.typings import State, StateRow
 
@@ -94,3 +95,22 @@ class Engine2048:
                 if j != 0 and state[i][j - 1] == state[i][j]:
                     return False
         return True
+
+    @staticmethod
+    def spawn_random(
+        state: State,
+        choices: List[int],
+        choice_fn: Callable[[Sequence[Any]], Any],
+    ) -> State:
+        empty_field_indexes = [
+            (i_col, i_row)
+            for i_col in range(len(state))
+            for i_row in range(len(state[i_col]))
+            if state[i_col][i_row] == 0
+        ]
+
+        index = choice_fn(empty_field_indexes)
+
+        new_state = copy.deepcopy(state)
+        new_state[index[0]][index[1]] = choice_fn(choices)
+        return new_state
