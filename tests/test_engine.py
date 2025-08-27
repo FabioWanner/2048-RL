@@ -81,3 +81,9 @@ def test_game_over(state, expect_game_over):
 def test_spawn_random(initial_state, choice_fn):
     result_state = Engine2048.spawn_random(initial_state, [2, 4], choice_fn)
     assert result_state == [[0, 8, 2, 2], [4, 2, 0, 2], [0, 0, 0, 0], [4, 0, 0, 2]]
+
+
+def test_engine_init():
+    engine = Engine2048(board_size=3, seed=0)
+    assert engine.state == [[2, 2, 0], [2, 2, 2], [2, 2, 2]]
+    assert engine.game_over == False

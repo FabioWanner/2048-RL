@@ -1,5 +1,6 @@
 import copy
 from enum import Enum
+from random import Random
 from typing import List, Callable, Sequence, Any
 
 from src.engine.typings import State, StateRow
@@ -17,8 +18,12 @@ class Direction(Enum):
 
 
 class Engine2048:
-    def __init__(self):
-        pass
+    init_choices = [0, 2]
+    spawn_choices = [2, 4]
+
+    def __init__(self, board_size: int, seed: int | None = None):
+        self.rng = Random(seed)
+        self.state = self.generate_state(board_size, self.init_choices, self.rng.choice)
 
     @staticmethod
     def generate_state(
@@ -114,3 +119,7 @@ class Engine2048:
         new_state = copy.deepcopy(state)
         new_state[index[0]][index[1]] = choice_fn(choices)
         return new_state
+
+    @property
+    def game_over(self):
+        return self.check_game_over(self.state)
