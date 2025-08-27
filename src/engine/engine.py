@@ -123,3 +123,21 @@ class Engine2048:
     @property
     def game_over(self):
         return self.check_game_over(self.state)
+
+    def evolve(self, direction: Direction) -> bool:
+        if self.game_over:
+            return False
+
+        evolved_state = self.merge(self.state, direction)
+
+        if self.state == evolved_state:
+            return False
+
+        self.state = evolved_state
+
+        self.state = self.spawn_random(self.state, self.spawn_choices, self.rng.choice)
+
+        if self.game_over:
+            return False
+
+        return True

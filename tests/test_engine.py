@@ -87,3 +87,47 @@ def test_engine_init():
     engine = Engine2048(board_size=3, seed=0)
     assert engine.state == [[2, 2, 0], [2, 2, 2], [2, 2, 2]]
     assert engine.game_over == False
+
+
+def test_engine_evolve(initial_state):
+    engine = Engine2048(board_size=4, seed=0)
+    engine.state = initial_state
+
+    assert engine.evolve(Direction.LEFT)
+
+    assert engine.state == [
+        [8, 4, 0, 0],
+        [4, 4, 0, 0],
+        [2, 0, 0, 0],
+        [2, 0, 0, 0],
+    ]
+    assert engine.game_over == False
+
+    assert engine.evolve(Direction.DOWN)
+
+    assert engine.state == [
+        [0, 0, 0, 0],
+        [8, 0, 0, 0],
+        [4, 0, 0, 0],
+        [4, 8, 0, 2],
+    ]
+    assert engine.game_over == False
+
+
+def test_engine_evolve_when_game_already_over(initial_state):
+    engine = Engine2048(board_size=2, seed=0)
+    engine.state = [[1, 2], [3, 4]]
+    assert not engine.evolve(Direction.LEFT)
+
+
+def test_engine_evolve_when_game_over_after_move(initial_state):
+    engine = Engine2048(board_size=2, seed=0)
+    engine.state = [[1, 1], [3, 5]]
+    assert not engine.evolve(Direction.LEFT)
+    assert engine.state == [[2, 4], [3, 5]]
+
+
+def test_engine_evolve_when_move_does_not_alter_state(initial_state):
+    engine = Engine2048(board_size=2, seed=0)
+    engine.state = [[1, 0], [0, 0]]
+    assert not engine.evolve(Direction.LEFT)
