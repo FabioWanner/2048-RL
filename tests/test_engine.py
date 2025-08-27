@@ -57,3 +57,16 @@ def test_merge(initial_state, direction, expected_state):
 def test_merge_in_unsupported_direction(initial_state, direction):
     with pytest.raises(UnsupportedDirection):
         Engine2048.merge(initial_state, direction)
+
+
+@pytest.mark.parametrize(
+    "state, expect_game_over",
+    [
+        ([[1, 1], [0, 0]], False),
+        ([[1, 1], [2, 2]], False),
+        ([[0, 1], [2, 3]], False),
+        ([[1, 2], [3, 4]], True),
+    ],
+)
+def test_game_over(state, expect_game_over):
+    assert Engine2048.check_game_over(state) is expect_game_over

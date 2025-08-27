@@ -82,3 +82,15 @@ class Engine2048:
         raise UnsupportedDirection(
             f"The given direction '{direction}' is not supported."
         )
+
+    @staticmethod
+    def check_game_over(state: State) -> bool:
+        for i in range(len(state)):
+            for j in range(len(state[0])):
+                if state[i][j] == 0:
+                    return False
+                if i != 0 and state[i - 1][j] == state[i][j]:
+                    return False
+                if j != 0 and state[i][j - 1] == state[i][j]:
+                    return False
+        return True
