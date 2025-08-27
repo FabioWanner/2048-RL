@@ -1,3 +1,6 @@
+from random import Random
+from unittest.mock import MagicMock
+
 import pytest
 
 from src.engine.engine import Direction, Engine2048, UnsupportedDirection
@@ -7,6 +10,20 @@ from src.engine.typings import State
 @pytest.fixture
 def initial_state() -> State:
     return [[0, 8, 2, 2], [4, 2, 0, 2], [0, 0, 0, 0], [0, 0, 0, 2]]
+
+
+def test_generate_state():
+    rng = Random(0)
+    result_state = Engine2048.generate_state(3, [0, 3, 7], rng.choice)
+    assert result_state == [[3, 3, 0], [3, 7, 3], [3, 3, 3]]
+
+
+def test_generate_state_does_never_return_all_zero_tiles():
+    choice_mock = MagicMock()
+    choice_mock.side_effect = [0, 0, 0, 0, 0, 0, 0, 1]
+    result_state = Engine2048.generate_state(2, [], choice_mock)
+
+    assert result_state == [[0, 0], [0, 1]]
 
 
 @pytest.mark.parametrize(

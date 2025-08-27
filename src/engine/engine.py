@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List, Callable, Sequence
 
 from src.engine.typings import State, StateRow
 
@@ -17,6 +18,16 @@ class Direction(Enum):
 class Engine2048:
     def __init__(self):
         pass
+
+    @staticmethod
+    def generate_state(
+        size: int, choices: List[int | None], choice_fn: Callable[[Sequence[int]], int]
+    ) -> State:
+        state = [choice_fn(choices) for _ in range(size * size)]
+
+        if all(v == 0 for v in state):
+            return Engine2048.generate_state(size, choices, choice_fn)
+        return [state[i : i + size] for i in range(0, len(state), size)]
 
     @staticmethod
     def merge_row_left(row: StateRow) -> StateRow:
