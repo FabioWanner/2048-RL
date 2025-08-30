@@ -1,7 +1,7 @@
 import copy
 from enum import Enum
 from random import Random
-from typing import List, Callable, Sequence, Any
+from typing import List, Callable, Sequence, Any, Tuple
 
 from src.engine.typings import State, StateRow
 
@@ -24,6 +24,7 @@ class Engine2048:
     def __init__(self, board_size: int, seed: int | None = None):
         self.rng = Random(seed)
         self.state = self.generate_state(board_size, self.init_choices, self.rng.choice)
+        self.score = 0
 
     @staticmethod
     def generate_state(
@@ -36,17 +37,19 @@ class Engine2048:
         return [state[i : i + size] for i in range(0, len(state), size)]
 
     @staticmethod
-    def merge_row_left(row: StateRow) -> StateRow:
+    def merge_row_left(row: StateRow) -> Tuple[StateRow, int]:
         row_length = len(row)
         row = [e for e in row if e != 0]
 
         merged_row: StateRow = []
+        row_score = 0
         i = 0
         while i < len(row):
             current = row[i]
             if i + 1 < len(row) and row[i + 1] == current:
                 merged_value = current * 2
                 merged_row.append(merged_value)
+                row_score += merged_value
                 i += 2
             else:
                 merged_row.append(current)
@@ -54,11 +57,17 @@ class Engine2048:
 
         if len(merged_row) < row_length:
             merged_row.extend([0] * (row_length - len(merged_row)))
-        return merged_row
+        return merged_row, row_score
 
     @staticmethod
-    def merge_left(state: State) -> State:
-        return [Engine2048.merge_row_left(row) for row in state]
+    def merge_left(state: State) -> Tuple[State, int]:
+        next_state: State = []
+        total_score = 0
+        for row in state:
+            next_row, row_score = Engine2048.merge_row_left(row)
+            next_state.append(next_row)
+            total_score += row_score
+        return next_state, total_score
 
     @staticmethod
     def flip(state: State) -> State:
@@ -69,21 +78,21 @@ class Engine2048:
         return [[state[j][i] for j in range(len(state))] for i in range(len(state))]
 
     @staticmethod
-    def merge(state: State, direction: Direction) -> State:
+    def merge(state: State, direction: Direction) -> Tuple[State, int]:
         if direction == Direction.LEFT:
             return Engine2048.merge_left(state)
         if direction == Direction.RIGHT:
             prepared_state = Engine2048.flip(state)
-            next_state = Engine2048.merge_left(prepared_state)
-            return Engine2048.flip(next_state)
+            next_state, next_score = Engine2048.merge_left(prepared_state)
+            return Engine2048.flip(next_state), next_score
         if direction == Direction.UP:
             prepared_state = Engine2048.rotate_clockwise(Engine2048.flip(state))
-            next_state = Engine2048.merge_left(prepared_state)
-            return Engine2048.flip(Engine2048.rotate_clockwise(next_state))
+            next_state, next_score = Engine2048.merge_left(prepared_state)
+            return Engine2048.flip(Engine2048.rotate_clockwise(next_state)), next_score
         if direction == Direction.DOWN:
             prepared_state = Engine2048.flip(Engine2048.rotate_clockwise(state))
-            next_state = Engine2048.merge_left(prepared_state)
-            return Engine2048.rotate_clockwise(Engine2048.flip(next_state))
+            next_state, next_score = Engine2048.merge_left(prepared_state)
+            return Engine2048.rotate_clockwise(Engine2048.flip(next_state)), next_score
 
         raise UnsupportedDirection(
             f"The given direction '{direction}' is not supported."
@@ -128,12 +137,13 @@ class Engine2048:
         if self.game_over:
             return False
 
-        evolved_state = self.merge(self.state, direction)
+        merged_state, merge_score = self.merge(self.state, direction)
 
-        if self.state == evolved_state:
+        if self.state == merged_state:
             return False
 
-        self.state = evolved_state
+        self.state = merged_state
+        self.score += merge_score
 
         self.state = self.spawn_random(self.state, self.spawn_choices, self.rng.choice)
 

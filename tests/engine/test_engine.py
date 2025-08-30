@@ -33,30 +33,35 @@ def test_generate_state_does_never_return_all_zero_tiles():
 
 
 @pytest.mark.parametrize(
-    "direction, expected_state",
+    "direction, expected_state, expected_score",
     [
         (
             Direction.LEFT,
             [[8, 4, 0, 0], [4, 4, 0, 0], [0, 0, 0, 0], [2, 0, 0, 0]],
+            8,
         ),
         (
             Direction.RIGHT,
             [[0, 0, 8, 4], [0, 0, 4, 4], [0, 0, 0, 0], [0, 0, 0, 2]],
+            8,
         ),
         (
             Direction.UP,
             [[4, 8, 2, 4], [0, 2, 0, 2], [0, 0, 0, 0], [0, 0, 0, 0]],
+            4,
         ),
         (
             Direction.DOWN,
             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 8, 0, 2], [4, 2, 2, 4]],
+            4,
         ),
     ],
 )
-def test_merge(initial_state, direction, expected_state):
-    result_state = Engine2048.merge(initial_state, direction)
+def test_merge(initial_state, direction, expected_state, expected_score):
+    result_state, result_score = Engine2048.merge(initial_state, direction)
 
     assert result_state == expected_state
+    assert result_score == expected_score
 
 
 @pytest.mark.parametrize("direction", [None, 4, "string"])
@@ -87,6 +92,7 @@ def test_engine_init():
     engine = Engine2048(board_size=3, seed=0)
     assert engine.state == [[2, 2, 0], [2, 2, 2], [2, 2, 2]]
     assert engine.game_over == False
+    assert engine.score == 0
 
 
 def test_engine_evolve(initial_state):
@@ -101,6 +107,7 @@ def test_engine_evolve(initial_state):
         [2, 0, 0, 0],
         [2, 0, 0, 0],
     ]
+    assert engine.score == 8
     assert engine.game_over == False
 
     assert engine.evolve(Direction.DOWN)
@@ -111,6 +118,7 @@ def test_engine_evolve(initial_state):
         [4, 0, 0, 0],
         [4, 8, 0, 2],
     ]
+    assert engine.score == 20
     assert engine.game_over == False
 
 
