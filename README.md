@@ -80,6 +80,36 @@ randomly.
 and the overall average score as a green line.*
 
 
+### Training with network from Tutorial
+
+If I train with the parameters and network used in the tutorial the network performs even worse than the random 
+generator.
+
+![image](graphs/training_with_tutorial_network.png)
+*The graph shows the running average training score over 10'000 episodes of the tutorial network and the average score 
+of random moves as a green line.*
+
+It somehow seems to make sense that this network won't work as the problem solved in the tutorial is quite different.
+The physics in the cartpole simulation can be described in a few equations. While it's not easy to solve, there are 
+strong correlations of inout and output that a network should be able to pick up (and in fact it does as the tutorial
+proves). 2048 is very different, while the merging is a simple mechanic, it also has a random component with the 
+spawning of new tiles.
+
+
+### Training with network suggested in internet resources
+
+As I have no experience in designing such a network, I searched for resources and found some that had success using
+convolutional networks. It looks like the former might have inspired the latter.
+
+- https://www.youtube.com/watch?v=qKAMUCQCInM
+- https://medium.com/@qwert12500/playing-2048-with-deep-q-learning-with-pytorch-implementation-4313291efe61
+
+Since both of the above sources state a higher mean random score, I investigated the cause of this. The explanation is 
+simple: when spawning a new tile, I currently use a 50:50 chance of either 2 or 4, but the original game uses a ration 
+of 9:1. With the adapted ratio, the scores look like the following:
+
+
+
 How to use the provided code
 ---
 
