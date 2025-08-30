@@ -55,3 +55,26 @@ problem-dependent. There are a lot of variables to consider, starting with how t
 how to reward the agent and setting the right hyperparameters for the training. All seem to have some influence on
 what kind of network to choose and vice versa... I do not really have the capacity to deep dive the topic at the moment
 and will therefore just explore how far I can get with an empiric approach.
+
+### Simulation with untrained network
+
+I ran the training with an untrained network and no optimizing step (basically choosing a random direction for every
+step) for 10'000 episodes. This gives a good baseline for how well random performs in 2048. My minimal goal for now is
+to get a network that will perform just better than random. The run did not take long, so I think I can keep using the 
+Python standard library instead of numpy for the engine.
+
+- Min Score: 36
+- Average Score: 860
+- Max Score: 3184
+- Min number of moves: 23
+- Max number of moves: 3903
+- Average number of moves: 426
+- Max tile reached: 256
+
+There is no significant change in the data as epsilon value gets smaller (smaller epsilon means that more actions are 
+decided by the network instead of by the random generator). This basically means that the untrained network chooses 
+randomly.
+
+![image](graphs/training_with_no_network_optimization.png)
+*The graph shows running average training score over 10'000 episodes of an untrained network without optimizing step
+and the overall average score as a green line.*
