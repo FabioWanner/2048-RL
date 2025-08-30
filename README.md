@@ -78,3 +78,14 @@ randomly.
 ![image](graphs/training_with_no_network_optimization.png)
 *The graph shows running average training score over 10'000 episodes of an untrained network without optimizing step
 and the overall average score as a green line.*
+
+
+How to use the provided code
+---
+
+A python environment with the dependencies listed in `requirements.txt` is required. For running the training on a GPU
+a special, hardware/software-specific version of PyTorch is required. GPU is highly recommended for training. Follow 
+the guide here:
+https://pytorch.org/get-started/locally/
+
+Afterward the "main.py" script can be used to run the training.

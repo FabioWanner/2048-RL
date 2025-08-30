@@ -12,6 +12,7 @@ class MemoryFragment:
     action: int
     next_state: State
     score: int
+    terminal: bool = False
 
 
 class ReplayMemory:

@@ -11,6 +11,7 @@ from torch.optim.optimizer import ParamsT
 
 from src.engine.engine import Direction, Engine2048
 from src.engine.typings import State
+from src.model.networks.base import Network
 from src.model.networks.tutorial_network import DQNTutorial
 from src.model.parameters import Parameters
 from src.model.progress_tracker import ProgressTracker
@@ -36,7 +37,9 @@ class DeepQTrainer:
             [ParamsT, float | Tensor], Optimizer
         ] = torch.optim.Adam,
         engine_factory: Callable[[int, int | None], Engine2048] = Engine2048,
-        network_factory: Callable[[int, int], torch.nn.Module] = DQNTutorial,
+        network_factory: Callable[
+            [int, int, torch.device | None], Network
+        ] = DQNTutorial,
         memory_factory: Callable[[int], ReplayMemory] = ReplayMemory,
         device: torch.device | None = None,
         seed: int | None = None,
@@ -46,20 +49,20 @@ class DeepQTrainer:
         self.parameters = parameters
 
         self.engine = engine_factory(board_size, seed)
-        self.num_states = board_size * board_size
+        self.board_size = board_size
         self.num_actions = len(self.action_to_direction)
 
         self.device = device
-        self.policy_network = network_factory(self.num_states, self.num_actions).to(
-            device
-        )
-        self.target_network = network_factory(self.num_states, self.num_actions).to(
-            device
-        )
+        self.policy_network = network_factory(
+            self.board_size, self.num_actions, self.device
+        ).to(self.device)
+        self.target_network = network_factory(
+            self.board_size, self.num_actions, self.device
+        ).to(self.device)
 
         self.memory = memory_factory(parameters.replay_memory_size)
         self._optimizer_factory = optimizer_factory
-        self._loss_fn = nn.MSELoss()
+        self._loss_fn = nn.SmoothL1Loss()
 
     def _initialize_networks(self):
         self.target_network.load_state_dict(self.policy_network.state_dict())
@@ -68,6 +71,12 @@ class DeepQTrainer:
         self.optimizer = self._optimizer_factory(
             self.policy_network.parameters(), self.parameters.learning_rate
         )
+
+    def _update_target_network(self, snapshot_dir: Path):
+        if self.episode % self.parameters.target_update_rate == 0:
+            torch.save(self.policy_network.state_dict(), (snapshot_dir / "model.pt"))
+            self.target_network.load_state_dict(self.policy_network.state_dict())
+            self.policy_network.train()
 
     @property
     def epsilon(self):
@@ -78,19 +87,57 @@ class DeepQTrainer:
     @torch.no_grad()
     def _select_action(self, state: State):
         if self.rng.random() > self.epsilon:
-            return (
-                self.policy_network(self.state_to_network_input(state)).argmax().item()
-            )
+            return self.policy_network([state]).argmax().item()
         else:
             return self.rng.choice(range(0, self.num_actions))
 
-    @staticmethod
-    def state_to_network_input(state: State) -> torch.Tensor:
-        return torch.tensor([x for row in state for x in row], dtype=torch.float)
-
-    @torch.no_grad()
     def optimize(self, memory, policy_dqn, target_dqn, optimizer):
-        pass
+        if len(self.memory) < self.parameters.batch_size:
+            return
+
+        batch = memory.sample(self.parameters.batch_size)
+
+        states = []
+        actions = []
+        scores = []
+        non_terminal_next_states = []
+        is_not_terminal = []
+
+        for fragment in batch:
+            states.append(fragment.state)
+            actions.append(fragment.action)
+            scores.append(fragment.score)
+            if not fragment.terminal:
+                non_terminal_next_states.append(fragment.next_state)
+            is_not_terminal.append(not fragment.terminal)
+
+        non_terminal_mask = torch.tensor(
+            is_not_terminal, device=self.device, dtype=torch.bool
+        )
+
+        state_action_values = policy_dqn(states).gather(
+            1,
+            torch.tensor(actions, device=self.device, dtype=torch.int).reshape(
+                self.parameters.batch_size, 1
+            ),
+        )
+
+        next_state_values = torch.zeros(self.parameters.batch_size, device=self.device)
+        with torch.no_grad():
+            next_state_values[non_terminal_mask] = (
+                target_dqn(non_terminal_next_states).max(1)[0].detach()
+            )
+        expected_state_action_values = (
+            next_state_values * self.parameters.discount_factor
+        ) + torch.tensor(scores, device=self.device, dtype=torch.int)
+
+        loss = self._loss_fn(
+            state_action_values,
+            expected_state_action_values.reshape(self.parameters.batch_size, 1),
+        )
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
     @staticmethod
     def run_episode(
@@ -109,7 +156,10 @@ class DeepQTrainer:
             state = engine.state
             score = engine.score - previous_score
 
-            moves.append(MemoryFragment(previous_state, action, state, score))
+            if engine.game_over:
+                moves.append(MemoryFragment(previous_state, action, state, score, True))
+            else:
+                moves.append(MemoryFragment(previous_state, action, state, score))
         return moves
 
     def train(self, episodes: int, out: Path, description: str | None = None):
@@ -137,6 +187,8 @@ class DeepQTrainer:
             moves = self.run_episode(
                 self.engine, self._select_action, self.action_to_direction
             )
+            for move in moves:
+                self.memory.push(move)
 
             tracker.track(
                 episode=self.episode,
@@ -149,3 +201,4 @@ class DeepQTrainer:
             self.optimize(
                 self.memory, self.policy_network, self.target_network, self.optimizer
             )
+            self._update_target_network(data_dir)
