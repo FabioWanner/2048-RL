@@ -26,3 +26,28 @@ and the state is small, this will be reasonably fast when running RL on it where
 will be spent updating the model. This probably could have been solved much more elegantly using numpy or similar, but 
 I wanted to keep it simple and therefore did not introduce additional dependencies for this (yet).
 
+
+AI Model
+---
+
+Reading up about reinforcement learning it seems that Q-learning seems to be a good approach to try out as it's fairly
+simple and the pattern `state` -> `action` -> `reward` -> `state` seems to fit the game well. But there is one problem:
+regular Q-learning only works if that state space is "small" as the idea is to save all `states-actions-reward-state`
+possibilities to then be able to find the best action for a given state. This is not the case for the 2048 game as the
+state space is quite large. We got 16 fields, and each can have 17 different numbers (from 2^0 - 2^16), but since the 
+highest number can only be in one field (as there is no space to create two of these tiles), the number of possible 
+states is probably something along 17!. In reality it's a bit less because of symmetries, but it's anyway too much for
+Q-learning. If we used 5 bit per cell and therefore 10 Byte (5*16/8) for saving one state, we would need ~3.5 PB of 
+storage for all possible states alone (I'm ignoring symmetries and possible patterns we could exploit to reduce the 
+amount of data).
+
+Deep Q-learning (DQL) might help us out here: In DQL a neuronal network is used to approximate the function that 
+predicts the best action for a given state. This network is trained by using a replay buffer to sample random batches
+of experiences and then update the network parameters. I've mainly used these two resources to get started, but also 
+"consumed" some other resources that I found less helpful:
+
+- https://docs.pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
+- https://www.youtube.com/watch?v=EUrWGTCGzlA
+
+
+
