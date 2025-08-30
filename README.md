@@ -49,5 +49,9 @@ of experiences and then update the network parameters. I've mainly used these tw
 - https://docs.pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
 - https://www.youtube.com/watch?v=EUrWGTCGzlA
 
-
-
+I assume that the chosen network is very critical for the success of the training, but I do not have any experience in
+designing such networks. I did not find a comprehensive guide in how to design such a network, this seems much 
+problem-dependent. There are a lot of variables to consider, starting with how to represent the state in the network,
+how to reward the agent and setting the right hyperparameters for the training. All seem to have some influence on
+what kind of network to choose and vice versa... I do not really have the capacity to deep dive the topic at the moment
+and will therefore just explore how far I can get with an empiric approach.
