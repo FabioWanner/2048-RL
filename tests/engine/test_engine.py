@@ -139,3 +139,13 @@ def test_engine_evolve_when_move_does_not_alter_state(initial_state):
     engine = Engine2048(board_size=2, seed=0)
     engine.state = [[1, 0], [0, 0]]
     assert not engine.evolve(Direction.LEFT)
+
+
+def test_engine_reset(initial_state):
+    engine = Engine2048(board_size=2, seed=0)
+    engine.score = 100
+    assert engine.score == 100
+    state_before = engine.state
+    engine.reset()
+    assert state_before != engine.state
+    assert engine.score == 0

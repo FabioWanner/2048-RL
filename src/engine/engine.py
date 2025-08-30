@@ -22,6 +22,7 @@ class Engine2048:
     spawn_choices = [2, 4]
 
     def __init__(self, board_size: int, seed: int | None = None):
+        self.board_size = board_size
         self.rng = Random(seed)
         self.state = self.generate_state(board_size, self.init_choices, self.rng.choice)
         self.score = 0
@@ -151,3 +152,9 @@ class Engine2048:
             return False
 
         return True
+
+    def reset(self):
+        self.state = self.generate_state(
+            self.board_size, self.init_choices, self.rng.choice
+        )
+        self.score = 0
