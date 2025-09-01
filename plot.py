@@ -23,11 +23,12 @@ def plot_running_average(name: str, values: List[int], base_line: float | None =
 if __name__ == "__main__":
     scores = []
     with open(
-        "out/training_with_no_network_optimization/data.csv", newline=""
+        "out/training_with_tutorial_network_but_adapted_training_procedure/data.csv",
+        newline="",
     ) as csvfile:
         reader = csv.DictReader(csvfile)
 
         for row in reader:
             scores.append(int(row["score"]))
 
-    plot_running_average("Score", scores)
+    plot_running_average("Score", scores, 1067)

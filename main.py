@@ -1,4 +1,5 @@
 from pathlib import Path
+from time import sleep
 
 import torch
 
@@ -10,8 +11,23 @@ if __name__ == "__main__":
     print("Using device: ", device, "\n\n")
 
     trainer = DeepQTrainer(device=device, network_factory=DQNTutorial)
-    trainer.train(
-        10000,
-        Path().resolve() / "out",
-        "Training with tutorial parameters and network",
-    )
+    network_state_path = None
+
+    retries = 10
+    while retries > 0:
+        try:
+            trainer.train(
+                10000,
+                Path().resolve() / "out",
+                "Training with tutorial network and penalties",
+                network_state_path,
+            )
+        except Exception as e:
+            print(e)
+            sleep(30)
+            network_state_path = (
+                Path().resolve() / "out" / trainer.training_id / "model.pt"
+            )
+            if not network_state_path.exists():
+                network_state_path = None
+            retries -= 1

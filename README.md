@@ -138,6 +138,14 @@ I introduced a few changes to the trainer inspired by the Medium post:
   replay buffer size of 50k elements, this seems to be a tiny batch size. I suspect it's faster to do less optimization
   steps but bigger batches as it means fewer switches from CPU to GPU, so I went with some middle ground.
 
+With these adaptions I first re-trained the Tutorial network and, as expected, it actually improved the outcome 
+significantly. Note: Running the training multiple times results in very different outcomes. Most looked similar to the
+graph below, but one showed the same problem as stated above where it got worse than random over time.
+
+![image](graphs/training_with_tutorial_network_but_adapted_training_procedure.png)
+*The graph shows the running average training score over 10'000 episodes of the tutorial network with the adapted 
+training procedure described above. The average score of random moves is represented as a horizontal green line.*
+
 
 How to use the provided code
 ---

@@ -65,7 +65,10 @@ class DeepQTrainer:
         self._optimizer_factory = optimizer_factory
         self._loss_fn = nn.SmoothL1Loss()
 
-    def _initialize_networks(self):
+    def _initialize_networks(self, state_path: Path | None = None):
+        if state_path:
+            self.policy_network.load_state_dict(torch.load(state_path))
+
         self.target_network.load_state_dict(self.policy_network.state_dict())
         self.target_network.eval()
         self.policy_network.train()
@@ -197,7 +200,13 @@ class DeepQTrainer:
         )
         return tracker
 
-    def train(self, episodes: int, out: Path, description: str | None = None):
+    def train(
+        self,
+        episodes: int,
+        out: Path,
+        description: str | None = None,
+        network_state: Path | None = None,
+    ):
         self.training_id = str(uuid4())
         data_dir = out / self.training_id
         data_dir.mkdir(parents=True)
@@ -205,7 +214,7 @@ class DeepQTrainer:
 
         tracker = self._setup_tracker(data_dir, description)
 
-        self._initialize_networks()
+        self._initialize_networks(state_path=network_state)
 
         for self.episode in range(episodes):
             self.engine.reset()
