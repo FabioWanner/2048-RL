@@ -72,11 +72,14 @@ class DeepQTrainer:
             self.policy_network.parameters(), self.parameters.learning_rate
         )
 
-    def _update_target_network(self, snapshot_dir: Path):
+    def _update_target_network(self):
         if self.episode % self.parameters.target_update_rate == 0:
-            torch.save(self.policy_network.state_dict(), (snapshot_dir / "model.pt"))
             self.target_network.load_state_dict(self.policy_network.state_dict())
             self.policy_network.train()
+
+    def _snapshot_policy_network(self, snapshot_dir: Path):
+        snapshot_path = snapshot_dir / "model.pt"
+        torch.save(self.policy_network.state_dict(), snapshot_path)
 
     @property
     def epsilon(self):
@@ -201,4 +204,7 @@ class DeepQTrainer:
             self.optimize(
                 self.memory, self.policy_network, self.target_network, self.optimizer
             )
-            self._update_target_network(data_dir)
+            self._update_target_network()
+
+            if self.episode > 0 and self.episode % 1000 == 0:
+                self._snapshot_policy_network(data_dir)
