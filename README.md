@@ -135,7 +135,7 @@ I introduced a few changes to the trainer inspired by the Medium post:
 - Penalties for reaching game-over. This seems undesirable. I should introduce this individually and check how this 
   impacts the training. But I do not have the time to do so now.
 - In the Medium post the optimizer runs for 100 times using small batches (of 64 elements) for each episode. With a 
-  replay buffer size of 50k elements, this seems to be a tiny batch size. I suspect it's faster to do less optimization
+  replay buffer size of 50k elements, this seems to be a tiny batch size. I suspect it's faster to do fewer optimization
   steps but bigger batches as it means fewer switches from CPU to GPU, so I went with some middle ground.
 
 With these adaptions I first re-trained the Tutorial network and, as expected, it actually improved the outcome 
@@ -147,6 +147,31 @@ graph below, but one showed the same problem as stated above where it got worse 
 training procedure described above. The average score of random moves is represented as a horizontal green line.*
 
 
+#### Training the network
+
+I've trained the suggested network with almost identical training parameters (except a bigger batch size) for about 5000
+episodes (aborting the training after about 16h due to time constraints). The training results look quite promising.
+I am not sure why it did plateau towards the end, it might just be a coincidence, although I would expect it to do so at
+some point.
+
+![image](graphs/training_with_convolutional_network.png)
+*The graph shows the running average training score over 5'500 episodes of the convolutional network suggested in the
+Medium blog post. The average score of random moves is represented as a horizontal green line.*
+
+Letting the model play the game for 1000 rounds resulted in the following data:
+
+- Min Score: 548
+- Average Score: 3816
+- Max Score: 13400
+- Min number of moves: 66
+- Max number of moves: 9105
+- Average number of moves: 311
+- Max tile reached: 1024
+
+The biggest problem with this model is the size of the network. Its state is 380 MB large, which is quite a lot for a
+network playing 2048. The size also affects the training time considerably.
+
+
 How to use the provided code
 ---
 
@@ -155,4 +180,4 @@ a special, hardware/software-specific version of PyTorch is required. GPU is hig
 the guide here:
 https://pytorch.org/get-started/locally/
 
-Afterward the "main.py" script can be used to run the training.
+Afterward, the "main.py" script can be used to run the training.

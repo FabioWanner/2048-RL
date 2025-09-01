@@ -4,13 +4,24 @@ from time import sleep
 import torch
 
 from src.model.deep_q_trainer import DeepQTrainer
-from src.model.networks.tutorial_network import DQNTutorial
+from src.model.networks.convolutional_network import DQNConvolutional
+from src.model.parameters import Parameters
+
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using device: ", device, "\n\n")
 
-    trainer = DeepQTrainer(device=device, network_factory=DQNTutorial)
+    parameters = Parameters(
+        batch_size=256,
+        learning_rate=5e-5,
+        replay_memory_size=50000,
+        epsilon_decay_rate=1000,
+    )
+
+    trainer = DeepQTrainer(
+        device=device, parameters=parameters, network_factory=DQNConvolutional
+    )
     network_state_path = None
 
     retries = 10
@@ -19,7 +30,7 @@ if __name__ == "__main__":
             trainer.train(
                 10000,
                 Path().resolve() / "out",
-                "Training with tutorial network and penalties",
+                "Training with convolutional network",
                 network_state_path,
             )
         except Exception as e:
