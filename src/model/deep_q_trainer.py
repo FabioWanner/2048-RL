@@ -94,11 +94,20 @@ class DeepQTrainer:
         else:
             return self.rng.choice(range(0, self.num_actions))
 
-    def optimize(self, memory, policy_dqn, target_dqn, optimizer):
-        if len(self.memory) < self.parameters.batch_size:
+    @staticmethod
+    def optimize(
+        parameters: Parameters,
+        memory: ReplayMemory,
+        policy_network: Network,
+        target_network: Network,
+        optimizer: Optimizer,
+        loss_fn,
+        device: torch.device | None = None,
+    ):
+        if len(memory) < parameters.batch_size:
             return
 
-        batch = memory.sample(self.parameters.batch_size)
+        batch = memory.sample(parameters.batch_size)
 
         states = []
         actions = []
@@ -115,28 +124,28 @@ class DeepQTrainer:
             is_not_terminal.append(not fragment.terminal)
 
         non_terminal_mask = torch.tensor(
-            is_not_terminal, device=self.device, dtype=torch.bool
+            is_not_terminal, device=device, dtype=torch.bool
         )
 
-        state_action_values = policy_dqn(states).gather(
+        state_action_values = policy_network(states).gather(
             1,
-            torch.tensor(actions, device=self.device, dtype=torch.int).reshape(
-                self.parameters.batch_size, 1
+            torch.tensor(actions, device=device, dtype=torch.int).reshape(
+                parameters.batch_size, 1
             ),
         )
 
-        next_state_values = torch.zeros(self.parameters.batch_size, device=self.device)
+        next_state_values = torch.zeros(parameters.batch_size, device=device)
         with torch.no_grad():
             next_state_values[non_terminal_mask] = (
-                target_dqn(non_terminal_next_states).max(1)[0].detach()
+                target_network(non_terminal_next_states).max(1)[0].detach()
             )
         expected_state_action_values = (
-            next_state_values * self.parameters.discount_factor
-        ) + torch.tensor(scores, device=self.device, dtype=torch.int)
+            next_state_values * parameters.discount_factor
+        ) + torch.tensor(scores, device=device, dtype=torch.int)
 
-        loss = self._loss_fn(
+        loss = loss_fn(
             state_action_values,
-            expected_state_action_values.reshape(self.parameters.batch_size, 1),
+            expected_state_action_values.reshape(parameters.batch_size, 1),
         )
         optimizer.zero_grad()
         loss.backward()
@@ -202,7 +211,13 @@ class DeepQTrainer:
             )
 
             self.optimize(
-                self.memory, self.policy_network, self.target_network, self.optimizer
+                device=self.device,
+                loss_fn=self._loss_fn,
+                memory=self.memory,
+                optimizer=self.optimizer,
+                parameters=self.parameters,
+                policy_network=self.policy_network,
+                target_network=self.target_network,
             )
             self._update_target_network()
 
