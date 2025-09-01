@@ -134,6 +134,10 @@ class Engine2048:
     def game_over(self):
         return self.check_game_over(self.state)
 
+    @property
+    def max_tile(self) -> int:
+        return max([max(row) for row in self.state])
+
     def evolve(self, direction: Direction) -> bool:
         if self.game_over:
             return False

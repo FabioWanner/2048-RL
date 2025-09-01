@@ -214,7 +214,7 @@ class DeepQTrainer:
                 episode=self.episode,
                 score=self.engine.score,
                 number_of_moves=len(moves),
-                max_tile=max(max(moves[-1].state)),
+                max_tile=self.engine.max_tile,
                 epsilon=self.epsilon,
             )
 

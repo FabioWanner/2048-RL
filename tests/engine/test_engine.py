@@ -149,3 +149,9 @@ def test_engine_reset(initial_state):
     engine.reset()
     assert state_before != engine.state
     assert engine.score == 0
+
+
+def test_engine_max_tile(initial_state):
+    engine = Engine2048(board_size=2, seed=0)
+    engine.state = [[1, 5, 5], [0, 7, 8]]
+    assert engine.max_tile == 8
