@@ -53,6 +53,7 @@ class DeepQTrainer:
         self.num_actions = len(self.action_to_direction)
 
         self.device = device
+        self._network_factory = network_factory
         self.policy_network = network_factory(
             self.board_size, self.num_actions, self.device
         ).to(self.device)
@@ -174,22 +175,29 @@ class DeepQTrainer:
                 moves.append(MemoryFragment(previous_state, action, state, score))
         return moves
 
+    def _setup_tracker(
+        self, data_dir: Path, description: str | None = None
+    ) -> ProgressTracker:
+        tracker = ProgressTracker(data_dir, to_console=True)
+        tracker.write_metadata(
+            dict(
+                id=self.training_id,
+                optimizer_factory=self._optimizer_factory.__name__,
+                network_factory=self._network_factory.__name__,
+                parameters=self.parameters.__dict__,
+                seed=self.seed,
+                description=description,
+            )
+        )
+        return tracker
+
     def train(self, episodes: int, out: Path, description: str | None = None):
         self.training_id = str(uuid4())
         data_dir = out / self.training_id
         data_dir.mkdir(parents=True)
         print(f"Training with id: {self.training_id}, output directory: {data_dir}")
 
-        tracker = ProgressTracker(data_dir, to_console=True)
-        tracker.write_metadata(
-            dict(
-                id=self.training_id,
-                optimizer_factory=self._optimizer_factory.__name__,
-                parameters=self.parameters.__dict__,
-                seed=self.seed,
-                description=description,
-            )
-        )
+        tracker = self._setup_tracker(data_dir, description)
 
         self._initialize_networks()
 
