@@ -35,11 +35,11 @@ class DQNConvolutional(Network):
         device: torch.device | None = None,
     ):
         super().__init__(size, n_actions, device)
-        self.conv1 = ConvBlock(self.size * self.size, 2048)
-        self.conv2 = ConvBlock(2048, 2048)
-        self.conv3 = ConvBlock(2048, 2048)
-        self.dense1 = nn.Linear(2048 * size * size, 1024)
-        self.dense6 = nn.Linear(1024, n_actions)
+        self.conv1 = ConvBlock(self.size * self.size, 512)
+        self.conv2 = ConvBlock(512, 512)
+        self.conv3 = ConvBlock(512, 512)
+        self.dense1 = nn.Linear(512 * size * size, 512)
+        self.dense6 = nn.Linear(512, n_actions)
 
     def forward(self, states):
         flattened = [x for state in states for row in state for x in row]

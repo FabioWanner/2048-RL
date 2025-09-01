@@ -171,6 +171,63 @@ Letting the model play the game for 1000 rounds resulted in the following data:
 The biggest problem with this model is the size of the network. Its state is 380 MB large, which is quite a lot for a
 network playing 2048. The size also affects the training time considerably.
 
+#### Optimizing the network
+
+I've reduced the model size quite a bit, in addition, now with the much smaller model size, I can easily increase the
+batch size for training. In the hope to positively affect training speed, I have also reduced the replay memory size.
+A large replay memory is needed if a network is in danger of "unlearning" previously learned behavior. Since each 
+episode starts from scratch and the number of average total moves is still much smaller than the replay memory, it seems
+to make sense to reduce its size. For this model I also refrain from training with spawning of new numbers. The model 
+will therefore only learn from the predictable state transitions. The model never sees the random game element. I don't 
+think that the randomness has a big impact on selecting the best next move, so the hope is to achieve better results by 
+not "confusing" the model.
+
+The training results look very nice, and the size of the network is, with 32MB, considerably smaller. This network did
+not plateau yet, but I didn't take the time to train it for longer (yet).
+
+![image](graphs/training_with_small_convolutional_network.png)
+*The graph shows the running average training score over 32k episodes of the small convolutional network. The average 
+score of random moves is represented as a horizontal green line.*
+
+
+Letting the model play the game for 1000 rounds resulted in the following data:
+
+- Min Score: 548
+- Average Score: 4080
+- Max Score: 12808
+- Min number of moves: 72
+- Max number of moves: 1623
+- Average number of moves: 331
+- Max tile reached: 1024
+
+The results look very similar to the bigger model and were reached with the same amount of training time. But the model
+is 10x smaller, and it seems to be much less prone to suggest "useless" moves. I also played a game with hints from this
+model, and it's interesting to see what it suggests. For sure, the tactic it learned is different from mine.
+
+
+Outlook
+---
+
+I think the network can still be improved quite a lot. For one, because there are many RL techniques out there that 
+could be explored but especially because the game follows very specific rules that can be considered. In the end we do 
+not need to find a model that predicts the whole game but that can be used to solve the game. Investing in understanding
+the domain and how this can be leveraged in RL is probably the best way forward. Supervised learning would be
+interesting to explore.
+
+As for the code itself: There are a lot of areas which need improvement:
+- Training speed is one limiting factor in finding a good solution. Adding some tracing to find bottlenecks would be 
+  helpful. For sure, running the game logic is consuming more time than I expected. As the model gets better, the impact
+  of this grows as more and more moves are executed per episode. Re-implementing this with execution speed in mind would
+  be a good idea.
+- The trainer class keeps way too much state which makes testing super hard. I would suggest refactoring this to make 
+  it more testable and reusable. Lots of testing is missing.
+- Some of the trainers' parameters are not configurable and therefore not in the saved metadata.
+- The trainer needs proper stop/resume functionality and error handling.
+- The progress tracker lacks some data: timestamps would be useful...
+- There is a warning about the padding in the convolutional network that needs to be investigated.
+
+And of course the user experience is horrifying, so a proper UI would be nice ;-)
+
 
 How to use the provided code
 ---

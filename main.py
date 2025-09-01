@@ -13,9 +13,9 @@ if __name__ == "__main__":
     print("Using device: ", device, "\n\n")
 
     parameters = Parameters(
-        batch_size=256,
+        batch_size=512,
         learning_rate=5e-5,
-        replay_memory_size=50000,
+        replay_memory_size=1024 * 20,
         epsilon_decay_rate=1000,
     )
 
@@ -28,9 +28,9 @@ if __name__ == "__main__":
     while retries > 0:
         try:
             trainer.train(
-                10000,
+                30000,
                 Path().resolve() / "out",
-                "Training with convolutional network",
+                "Training with small convolutional network",
                 network_state_path,
             )
         except Exception as e:

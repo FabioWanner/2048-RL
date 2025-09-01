@@ -168,8 +168,6 @@ class DeepQTrainer:
 
             action = select_fn(engine.state)
             do_spawn = engine.evolve(action_to_direction[action])
-            if do_spawn:
-                engine.spawn()
 
             state = engine.state
             score = engine.score - previous_score
@@ -182,6 +180,9 @@ class DeepQTrainer:
                 moves.append(MemoryFragment(previous_state, action, state, score, True))
             else:
                 moves.append(MemoryFragment(previous_state, action, state, score))
+
+            if do_spawn:
+                engine.spawn()
         return moves
 
     def _setup_tracker(

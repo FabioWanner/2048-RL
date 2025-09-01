@@ -23,7 +23,7 @@ def plot_running_average(name: str, values: List[int], base_line: float | None =
 if __name__ == "__main__":
     scores = []
     with open(
-        "out/training_with_tutorial_network_but_adapted_training_procedure/data.csv",
+        "out/training_with_small_convolutional_network/data.csv",
         newline="",
     ) as csvfile:
         reader = csv.DictReader(csvfile)
