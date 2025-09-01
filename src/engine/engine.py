@@ -19,7 +19,7 @@ class Direction(Enum):
 
 class Engine2048:
     init_choices = [0, 2]
-    spawn_choices = [2, 4]
+    spawn_choices = [2] * 9 + [4]
 
     def __init__(self, board_size: int, seed: int | None = None):
         self.board_size = board_size
@@ -131,12 +131,24 @@ class Engine2048:
         return new_state
 
     @property
-    def game_over(self):
+    def game_over(self) -> bool:
         return self.check_game_over(self.state)
 
     @property
     def max_tile(self) -> int:
         return max([max(row) for row in self.state])
+
+    def spawn(self) -> bool:
+        try:
+            self.state = self.spawn_random(
+                self.state, self.spawn_choices, self.rng.choice
+            )
+        except IndexError:
+            return False
+        if self.game_over:
+            return False
+
+        return True
 
     def evolve(self, direction: Direction) -> bool:
         if self.game_over:
@@ -149,12 +161,6 @@ class Engine2048:
 
         self.state = merged_state
         self.score += merge_score
-
-        self.state = self.spawn_random(self.state, self.spawn_choices, self.rng.choice)
-
-        if self.game_over:
-            return False
-
         return True
 
     def reset(self):

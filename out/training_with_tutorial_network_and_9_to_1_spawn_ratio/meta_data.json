@@ -1,0 +1,1 @@
+{"id": "a1fcbb8f-80b9-4075-b513-9f1f7e8734be", "optimizer_factory": "Adam", "parameters": {"learning_rate": 0.0003, "discount_factor": 0.99, "epsilon_max": 0.9, "epsilon_min": 0.01, "epsilon_decay_rate": 2500, "target_update_rate": 20, "batch_size": 128, "replay_memory_size": 10000}, "seed": null, "description": "Training with tutorial parameters and network and 9:1 spawn ratio"}

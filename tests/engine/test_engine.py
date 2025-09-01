@@ -95,6 +95,20 @@ def test_engine_init():
     assert engine.score == 0
 
 
+def test_engine_spawn(initial_state):
+    engine = Engine2048(board_size=2, seed=0)
+    engine.state = [[0, 0], [2, 2]]
+    assert engine.spawn()
+    assert engine.state == [[0, 2], [2, 2]]
+
+
+def test_engine_spawn_on_full_field(initial_state):
+    engine = Engine2048(board_size=2, seed=0)
+    engine.state = [[2, 2], [2, 2]]
+    assert not engine.spawn()
+    assert engine.state == [[2, 2], [2, 2]]
+
+
 def test_engine_evolve(initial_state):
     engine = Engine2048(board_size=4, seed=0)
     engine.state = initial_state
@@ -104,7 +118,7 @@ def test_engine_evolve(initial_state):
     assert engine.state == [
         [8, 4, 0, 0],
         [4, 4, 0, 0],
-        [2, 0, 0, 0],
+        [0, 0, 0, 0],
         [2, 0, 0, 0],
     ]
     assert engine.score == 8
@@ -116,9 +130,9 @@ def test_engine_evolve(initial_state):
         [0, 0, 0, 0],
         [8, 0, 0, 0],
         [4, 0, 0, 0],
-        [4, 8, 0, 2],
+        [2, 8, 0, 0],
     ]
-    assert engine.score == 20
+    assert engine.score == 16
     assert engine.game_over == False
 
 
@@ -129,9 +143,10 @@ def test_engine_evolve_when_game_already_over(initial_state):
 
 
 def test_engine_evolve_when_game_over_after_move(initial_state):
-    engine = Engine2048(board_size=2, seed=0)
+    engine = Engine2048(board_size=2, seed=3)
     engine.state = [[1, 1], [3, 5]]
-    assert not engine.evolve(Direction.LEFT)
+    assert engine.evolve(Direction.LEFT)
+    assert not engine.spawn()
     assert engine.state == [[2, 4], [3, 5]]
 
 

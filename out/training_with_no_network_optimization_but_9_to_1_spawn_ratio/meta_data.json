@@ -1,0 +1,1 @@
+{"id": "e420d593-9c10-43ac-89ed-e2e16bb23842", "optimizer_factory": "Adam", "parameters": {"learning_rate": 0.0003, "discount_factor": 0.99, "epsilon_max": 0.9, "epsilon_min": 0.01, "epsilon_decay_rate": 2500, "target_update_rate": 20, "batch_size": 128, "replay_memory_size": 10000}, "seed": null, "description": "Without optimizing the network and 9:1 spawn ratio"}

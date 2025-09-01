@@ -164,12 +164,18 @@ class DeepQTrainer:
             previous_score = engine.score
 
             action = select_fn(engine.state)
-            engine.evolve(action_to_direction[action])
+            do_spawn = engine.evolve(action_to_direction[action])
+            if do_spawn:
+                engine.spawn()
 
             state = engine.state
             score = engine.score - previous_score
 
+            if state == previous_state:
+                score = -10
+
             if engine.game_over:
+                score = -100
                 moves.append(MemoryFragment(previous_state, action, state, score, True))
             else:
                 moves.append(MemoryFragment(previous_state, action, state, score))
@@ -218,15 +224,16 @@ class DeepQTrainer:
                 epsilon=self.epsilon,
             )
 
-            self.optimize(
-                device=self.device,
-                loss_fn=self._loss_fn,
-                memory=self.memory,
-                optimizer=self.optimizer,
-                parameters=self.parameters,
-                policy_network=self.policy_network,
-                target_network=self.target_network,
-            )
+            for _ in range(20):
+                self.optimize(
+                    device=self.device,
+                    loss_fn=self._loss_fn,
+                    memory=self.memory,
+                    optimizer=self.optimizer,
+                    parameters=self.parameters,
+                    policy_network=self.policy_network,
+                    target_network=self.target_network,
+                )
             self._update_target_network()
 
             if self.episode > 0 and self.episode % 1000 == 0:

@@ -98,16 +98,45 @@ spawning of new tiles.
 
 ### Training with network suggested in internet resources
 
-As I have no experience in designing such a network, I searched for resources and found some that had success using
-convolutional networks. It looks like the former might have inspired the latter.
+Since I have no experience in designing a suitable network, and this domain is complex and vast, for sure way too vast 
+for the scope of this project, I searched for resources specific for 2048. I found some that had success using convolutional 
+networks. It looks like the former might have inspired the latter.
 
-- https://www.youtube.com/watch?v=qKAMUCQCInM
+- https://www.youtube.com/watch?v=`qKAMUCQCInM
 - https://medium.com/@qwert12500/playing-2048-with-deep-q-learning-with-pytorch-implementation-4313291efe61
 
 Since both of the above sources state a higher mean random score, I investigated the cause of this. The explanation is 
-simple: when spawning a new tile, I currently use a 50:50 chance of either 2 or 4, but the original game uses a ration 
+simple: when spawning a new tile, I currently use a 50:50 chance of either 2 or 4, but the original game uses a ratio 
 of 9:1. With the adapted ratio, the scores look like the following:
 
+#### Random baseline with 9:1 spawn ratio
+
+![image](graphs/training_with_no_network_optimization_but_9_to_1_spawn_ratio.png)
+*The graph shows running average training score over 10'000 episodes of an untrained network without optimizing step
+and the overall average score as a green line. The spawn ratio of 2/4 values is 9:1 instead of 1:1.*
+
+- Min Score: 112
+- Average Score: 1067
+- Max Score: 4700
+- Min number of moves: 44
+- Max number of moves: 5486
+- Average number of moves: 561
+- Max tile reached: 512
+
+The training with the tutorial network showed, as expected, the same effect as described above.
+
+#### Adaptions made based on the Medium post
+
+I introduced a few changes to the trainer inspired by the Medium post:
+
+- Penalties for moves that do not change the state. As we can see in the data from the tutorial network, one thing that  
+  it seems to do is to repeat the same move over and over again. This will just generate a lot of useless training data
+  and might in fact be the reason for the decay in average score, below the random baseline.
+- Penalties for reaching game-over. This seems undesirable. I should introduce this individually and check how this 
+  impacts the training. But I do not have the time to do so now.
+- In the Medium post the optimizer runs for 100 times using small batches (of 64 elements) for each episode. With a 
+  replay buffer size of 50k elements, this seems to be a tiny batch size. I suspect it's faster to do less optimization
+  steps but bigger batches as it means fewer switches from CPU to GPU, so I went with some middle ground.
 
 
 How to use the provided code
