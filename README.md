@@ -237,4 +237,4 @@ a special, hardware/software-specific version of PyTorch is required. GPU is hig
 the guide here:
 https://pytorch.org/get-started/locally/
 
-Use the "main.py" script to run the training and the "play.py" script for playing the game on the commandline.
+Use the "train.py" script to run the training and the "play.py" script for playing the game on the commandline.
