@@ -1,5 +1,4 @@
 from pathlib import Path
-from time import sleep
 
 import torch
 
@@ -22,23 +21,9 @@ if __name__ == "__main__":
     trainer = DeepQTrainer(
         device=device, parameters=parameters, network_factory=DQNConvolutional
     )
-    network_state_path = None
 
-    retries = 10
-    while retries > 0:
-        try:
-            trainer.train(
-                30000,
-                Path().resolve() / "out",
-                "Training with small convolutional network",
-                network_state_path,
-            )
-        except Exception as e:
-            print(e)
-            sleep(30)
-            network_state_path = (
-                Path().resolve() / "out" / trainer.training_id / "model.pt"
-            )
-            if not network_state_path.exists():
-                network_state_path = None
-            retries -= 1
+    trainer.train(
+        30000,
+        Path().resolve() / "out",
+        "Training with small convolutional network",
+    )
