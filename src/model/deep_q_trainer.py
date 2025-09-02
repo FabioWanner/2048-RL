@@ -247,3 +247,4 @@ class DeepQTrainer:
 
             if self.episode > 0 and self.episode % 1000 == 0:
                 self._snapshot_policy_network(data_dir)
+        self._snapshot_policy_network(data_dir)
