@@ -1,4 +1,5 @@
 import math
+import warnings
 
 import torch
 from torch import nn
@@ -20,11 +21,12 @@ class ConvBlock(nn.Module):
         self.conv4 = nn.Conv2d(input_dim, d, 4, padding="same")
 
     def forward(self, x):
-        output1 = self.conv1(x)
-        output2 = self.conv2(x)
-        output3 = self.conv3(x)
-        output4 = self.conv4(x)
-        return torch.cat((output1, output2, output3, output4), dim=1)
+        with warnings.catch_warnings(action="ignore"):
+            output1 = self.conv1(x)
+            output2 = self.conv2(x)
+            output3 = self.conv3(x)
+            output4 = self.conv4(x)
+            return torch.cat((output1, output2, output3, output4), dim=1)
 
 
 class DQNConvolutional(Network):
