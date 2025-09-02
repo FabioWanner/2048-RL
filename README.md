@@ -102,7 +102,7 @@ Since I have no experience in designing a suitable network, and this domain is c
 for the scope of this project, I searched for resources specific for 2048. I found some that had success using convolutional 
 networks. It looks like the former might have inspired the latter.
 
-- https://www.youtube.com/watch?v=`qKAMUCQCInM
+- https://www.youtube.com/watch?v=qKAMUCQCInM
 - https://medium.com/@qwert12500/playing-2048-with-deep-q-learning-with-pytorch-implementation-4313291efe61
 
 Since both of the above sources state a higher mean random score, I investigated the cause of this. The explanation is 
